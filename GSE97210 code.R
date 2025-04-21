@@ -1,7 +1,7 @@
-#Ò»¡¢ÏÂÔØÊı¾İ
+#ä¸€ã€ä¸‹è½½æ•°æ®
 rm(list = ls()) 
 options(stringsAsFactors = F)
-setwd("E:/Desktop/ĞÂ")
+setwd("E:/Desktop/æ–°")
 library(GEOmirror)
 library(GEOquery)
 library(limma)
@@ -15,51 +15,51 @@ dat=dat[apply(dat,1,sd)>0,]
 dat[dat<0]=1
 dat=normalizeBetweenArrays(dat)
 
-#¶ş¡¢·Ö×é&×¢ÊÍ
+#äºŒã€åˆ†ç»„&æ³¨é‡Š
 table(pd$source_name_ch1)
-##·Ö×é
+##åˆ†ç»„
 group_list=ifelse(grepl('Normal arterial intima',pd$title),'Normal','AS')
 table(group_list)
-#ÉèÖÃ²Î¿¼Ë®Æ½£¬¶ÔÕÕÔÚÇ°£¬´¦ÀíÔÚºó
+#è®¾ç½®å‚è€ƒæ°´å¹³ï¼Œå¯¹ç…§åœ¨å‰ï¼Œå¤„ç†åœ¨å
 group_list = factor(group_list,
                     levels = c('Normal','AS'))
 table(group_list)
 
-# GPL16956 ×¢ÊÍ
+# GPL16956 æ³¨é‡Š
 library(openxlsx)
-ann=read.xlsx("2.xlsx",sheet=1,colNames = TRUE)##seqmap±È¶ÔµÃµ½2.xlsx
+ann=read.xlsx("2.xlsx",sheet=1,colNames = TRUE)##seqmapæ¯”å¯¹å¾—åˆ°2.xlsx
 colnames(ann)
 dat=as.data.frame(dat)
 dat$ID=rownames(dat)
 id_symbol_expr<-na.omit(merge(x=dat,y=ann[c('ID','lncRNA_ID')],by='ID',all.x=T))
-#ÕâÀï´¦ÀíÒ»¸öÌ½Õë¶ÔÓ¦²»Í¬geneÃûµÄÇé¿ö£¬Ëæ±ãÈ¡Ò»¸ö¾ÍĞĞ
+#è¿™é‡Œå¤„ç†ä¸€ä¸ªæ¢é’ˆå¯¹åº”ä¸åŒgeneåçš„æƒ…å†µï¼Œéšä¾¿å–ä¸€ä¸ªå°±è¡Œ
 symbol<-lapply(id_symbol_expr$lncRNA_ID,FUN = function(x){strsplit(x,'///')[[1]][1]})
 id_symbol_expr$lncRNA_ID<-as.character(id_symbol_expr$lncRNA_ID)
-#È¥³ıµôNAÖµ£¬¾ÍÊÇËµÓĞĞ©Ì½Õë¶ÔÓ¦²»µ½ÒÑÖªµÄ»ùÒòÉÏ£¬ÖÁÉÙÔÚGPLÎÄ¼şÖĞÃ»ÓĞ¶ÔÓ¦¹ØÏµ
+#å»é™¤æ‰NAå€¼ï¼Œå°±æ˜¯è¯´æœ‰äº›æ¢é’ˆå¯¹åº”ä¸åˆ°å·²çŸ¥çš„åŸºå› ä¸Šï¼Œè‡³å°‘åœ¨GPLæ–‡ä»¶ä¸­æ²¡æœ‰å¯¹åº”å…³ç³»
 ids=id_symbol_expr[id_symbol_expr$lncRNA_ID != 'NA',]
 ids=ids[ids$ID %in%  rownames(dat),]
 dat=dat[ids$ID,] 
-#´¦ÀíÒ»¸ögeneÃû¶ÔÓ¦¶à¸öÌ½ÕëÇé¿ö£¬ÖĞÎ»ÊıÅÅĞòÈ¡×î´ó
-#È¥µôdat×îºóÒ»ÁĞµÄID
+#å¤„ç†ä¸€ä¸ªgeneåå¯¹åº”å¤šä¸ªæ¢é’ˆæƒ…å†µï¼Œä¸­ä½æ•°æ’åºå–æœ€å¤§
+#å»æ‰datæœ€åä¸€åˆ—çš„ID
 b=dat[,-7]
-ids$median=apply(b,1,median) #idsĞÂ½¨medianÕâÒ»ÁĞ£¬ÁĞÃûÎªmedian£¬Í¬Ê±¶ÔdatÕâ¸ö¾ØÕó°´ĞĞ²Ù×÷£¬È¡Ã¿Ò»ĞĞµÄÖĞÎ»Êı£¬½«½á¹û¸øµ½medianÕâÒ»ÁĞµÄÃ¿Ò»ĞĞ
-ids=ids[order(ids$lncRNA_ID,ids$median,decreasing = T),]#¶Ôids$symbol°´ÕÕids$medianÖĞÎ»Êı´Ó´óµ½Ğ¡ÅÅÁĞµÄË³ĞòÅÅĞò£¬½«¶ÔÓ¦µÄĞĞ¸³ÖµÎªÒ»¸öĞÂµÄids
-ids=ids[!duplicated(ids$lncRNA_ID),]#½«symbolÕâÒ»ÁĞÈ¡È¡³öÖØ¸´Ïî£¬'!'Îª·ñ£¬¼´È¡³ö²»ÖØ¸´µÄÏî£¬È¥³ıÖØ¸´µÄgene £¬±£ÁôÃ¿¸ö»ùÒò×î´ó±í´ïÁ¿½á¹ûs
-dat=dat[ids$ID,] #ĞÂµÄidsÈ¡³öIDÕâÒ»ÁĞ£¬½«dat°´ÕÕÈ¡³öµÄÕâÒ»ÁĞÖĞµÄÃ¿Ò»ĞĞ×é³ÉÒ»¸öĞÂµÄdat
-rownames(dat)=ids$lncRNA_ID#°ÑidsµÄsymbolÕâÒ»ÁĞÖĞµÄÃ¿Ò»ĞĞ¸ødat×÷ÎªdatµÄĞĞÃû
-dat[1:4,1:4]  #±£ÁôÃ¿¸ö»ùÒòIDµÚÒ»´Î³öÏÖµÄĞÅÏ¢
+ids$median=apply(b,1,median) #idsæ–°å»ºmedianè¿™ä¸€åˆ—ï¼Œåˆ—åä¸ºmedianï¼ŒåŒæ—¶å¯¹datè¿™ä¸ªçŸ©é˜µæŒ‰è¡Œæ“ä½œï¼Œå–æ¯ä¸€è¡Œçš„ä¸­ä½æ•°ï¼Œå°†ç»“æœç»™åˆ°medianè¿™ä¸€åˆ—çš„æ¯ä¸€è¡Œ
+ids=ids[order(ids$lncRNA_ID,ids$median,decreasing = T),]#å¯¹ids$symbolæŒ‰ç…§ids$medianä¸­ä½æ•°ä»å¤§åˆ°å°æ’åˆ—çš„é¡ºåºæ’åºï¼Œå°†å¯¹åº”çš„è¡Œèµ‹å€¼ä¸ºä¸€ä¸ªæ–°çš„ids
+ids=ids[!duplicated(ids$lncRNA_ID),]#å°†symbolè¿™ä¸€åˆ—å–å–å‡ºé‡å¤é¡¹ï¼Œ'!'ä¸ºå¦ï¼Œå³å–å‡ºä¸é‡å¤çš„é¡¹ï¼Œå»é™¤é‡å¤çš„gene ï¼Œä¿ç•™æ¯ä¸ªåŸºå› æœ€å¤§è¡¨è¾¾é‡ç»“æœs
+dat=dat[ids$ID,] #æ–°çš„idså–å‡ºIDè¿™ä¸€åˆ—ï¼Œå°†datæŒ‰ç…§å–å‡ºçš„è¿™ä¸€åˆ—ä¸­çš„æ¯ä¸€è¡Œç»„æˆä¸€ä¸ªæ–°çš„dat
+rownames(dat)=ids$lncRNA_ID#æŠŠidsçš„symbolè¿™ä¸€åˆ—ä¸­çš„æ¯ä¸€è¡Œç»™datä½œä¸ºdatçš„è¡Œå
+dat[1:4,1:4]  #ä¿ç•™æ¯ä¸ªåŸºå› IDç¬¬ä¸€æ¬¡å‡ºç°çš„ä¿¡æ¯
 dat=dat[,-7]
 dim(dat) 
 dat[1:4,1:4] 
-table(group_list) #tableº¯Êı£¬²é¿´group_listÖĞµÄ·Ö×é¸öÊı
+table(group_list) #tableå‡½æ•°ï¼ŒæŸ¥çœ‹group_listä¸­çš„åˆ†ç»„ä¸ªæ•°
 
-#Èı¡¢·ÇÆ¥Åä·ÖÎö
+#ä¸‰ã€éåŒ¹é…åˆ†æ
 library(limma)
 design=model.matrix(~group_list)
 fit=lmFit(dat,design)
 fit=eBayes(fit)
 deg=topTable(fit,coef=2,number = Inf)
-## ²»Í¬µÄãĞÖµ£¬É¸Ñ¡µ½µÄ²îÒì»ùÒòÊıÁ¿¾Í²»Ò»Ñù£¬ºóÃæµÄ³¬¼¸ºÎ·Ö²¼¼ìÑé½á¹û¾Í´óÏà¾¶Í¥¡£
+## ä¸åŒçš„é˜ˆå€¼ï¼Œç­›é€‰åˆ°çš„å·®å¼‚åŸºå› æ•°é‡å°±ä¸ä¸€æ ·ï¼Œåé¢çš„è¶…å‡ ä½•åˆ†å¸ƒæ£€éªŒç»“æœå°±å¤§ç›¸å¾„åº­ã€‚
 logFC_t=2
 deg$g=ifelse(deg$P.Value>0.05,'stable',
              ifelse( deg$logFC > logFC_t,'UP',
@@ -75,7 +75,7 @@ dat=as.data.frame(dat)
 dat=cbind(dat,group_list)
 library("FactoMineR")
 library("factoextra")
-dat.pca<-PCA(dat[,-ncol(dat)],graph=FALSE)#ÏÖÔÚdat×îºóÒ»ÁĞÊÇgroup_list£¬ĞèÒªÖØĞÂ¸³Öµ¸øÒ»¸ödat.pca,Õâ¸ö¾ØÕóÊÇ²»º¬ÓĞ·Ö×éĞÅÏ¢µÄ
+dat.pca<-PCA(dat[,-ncol(dat)],graph=FALSE)#ç°åœ¨datæœ€åä¸€åˆ—æ˜¯group_listï¼Œéœ€è¦é‡æ–°èµ‹å€¼ç»™ä¸€ä¸ªdat.pca,è¿™ä¸ªçŸ©é˜µæ˜¯ä¸å«æœ‰åˆ†ç»„ä¿¡æ¯çš„
 fviz_pca_ind(dat.pca,
              geom.ind="point",
              col.ind=dat$group_list,
@@ -91,51 +91,51 @@ library(ggpubr)
 library(ggthemes)
 library(ggplot2)
 df=nrDEG
-df$g=ifelse(df$P.Value>0.05,'stable', #if ÅĞ¶Ï£ºÈç¹ûÕâÒ»»ùÒòµÄP.Value>0.01£¬ÔòÎªstable»ùÒò
-            ifelse( df$logFC >2,'up', #½ÓÉÏ¾äelse ·ñÔò£º½ÓÏÂÀ´¿ªÊ¼ÅĞ¶ÏÄÇĞ©P.Value<0.01µÄ»ùÒò£¬ÔÙif ÅĞ¶Ï£ºÈç¹ûlogFC >1.5,ÔòÎªup£¨ÉÏµ÷£©»ùÒò
-                    ifelse( df$logFC < -2,'down','stable') )#½ÓÉÏ¾äelse ·ñÔò£º½ÓÏÂÀ´¿ªÊ¼ÅĞ¶ÏÄÇĞ©logFC <1.5 µÄ»ùÒò£¬ÔÙif ÅĞ¶Ï£ºÈç¹ûlogFC <1.5£¬ÔòÎªdown£¨ÏÂµ÷£©»ùÒò£¬·ñÔòÎªstable»ùÒò
+df$g=ifelse(df$P.Value>0.05,'stable', #if åˆ¤æ–­ï¼šå¦‚æœè¿™ä¸€åŸºå› çš„P.Value>0.01ï¼Œåˆ™ä¸ºstableåŸºå› 
+            ifelse( df$logFC >2,'up', #æ¥ä¸Šå¥else å¦åˆ™ï¼šæ¥ä¸‹æ¥å¼€å§‹åˆ¤æ–­é‚£äº›P.Value<0.01çš„åŸºå› ï¼Œå†if åˆ¤æ–­ï¼šå¦‚æœlogFC >1.5,åˆ™ä¸ºupï¼ˆä¸Šè°ƒï¼‰åŸºå› 
+                    ifelse( df$logFC < -2,'down','stable') )#æ¥ä¸Šå¥else å¦åˆ™ï¼šæ¥ä¸‹æ¥å¼€å§‹åˆ¤æ–­é‚£äº›logFC <1.5 çš„åŸºå› ï¼Œå†if åˆ¤æ–­ï¼šå¦‚æœlogFC <1.5ï¼Œåˆ™ä¸ºdownï¼ˆä¸‹è°ƒï¼‰åŸºå› ï¼Œå¦åˆ™ä¸ºstableåŸºå› 
 )
 table(df$g)
 
 ggplot(df, aes(x = logFC, y = -log10(P.Value), colour=g)) +
   geom_point(alpha=0.4, size=3.5) +
   scale_color_manual(values=c("#546de5", "#d2dae2","#ff4757"))+
-  # ×ø±êÖá
+  # åæ ‡è½´
   labs(x="log2FoldChange",
        y="-log10(P.Value)")+
   theme_bw()+
   ggtitle("GSE97210")+
-  # Í¼Àı
+  # å›¾ä¾‹
   theme(plot.title = element_text(hjust = 0.5), 
         legend.position="right", 
         legend.title = element_blank()
   )
 
 #Figure 1A heatmap
-#ctrl+C¸´ÖÆGSE97210 TOP10ÏÂµ÷ÈÈÍ¼.xlsxÖĞÊı¾İ
+#ctrl+Cå¤åˆ¶GSE97210 TOP10ä¸‹è°ƒçƒ­å›¾.xlsxä¸­æ•°æ®
 dat=read.table("clipboard",header = T)
 library(readxl)
 library(openxlsx)
 library(RColorBrewer) 
 library(pheatmap)
-annotation_col = data.frame(Sample=factor(c(rep("Normal",3),rep("AS",3))))#´´½¨·Ö×éÁĞ
-row.names(annotation_col) = colnames(dat) #ÕâÒ»ĞĞ±ØĞëÓĞ£¬·ñÔò»á±¨´í£ºError in check.length("fill") :  'gpar' element 'fill' must not be length 0
+annotation_col = data.frame(Sample=factor(c(rep("Normal",3),rep("AS",3))))#åˆ›å»ºåˆ†ç»„åˆ—
+row.names(annotation_col) = colnames(dat) #è¿™ä¸€è¡Œå¿…é¡»æœ‰ï¼Œå¦åˆ™ä¼šæŠ¥é”™ï¼šError in check.length("fill") :  'gpar' element 'fill' must not be length 0
 
-ann_colors = list(Sample = c('Normal'="blue", 'AS'="red")) #¶¨Òå·Ö×éÑÕÉ«
+ann_colors = list(Sample = c('Normal'="blue", 'AS'="red")) #å®šä¹‰åˆ†ç»„é¢œè‰²
 pheatmap(dat,
-         scale = "row", # °´ĞĞ¹éÒ»»¯£¬²é¿´Òò×ÓÔÚ²»Í¬Ñù±¾ÖĞµÄ·Ö²¼Çé¿ö
-         cluster_cols = FALSE, clustering_distance_rows = "correlation", #È¡ÏûÁĞ¾ÛÀà£¬±íÊ¾ĞĞ¾ÛÀàÊ¹ÓÃÆ¤¶ûÉ­Ïà¹ØÏµÊı¾ÛÀà
-         treeheight_row = 30, # ÉèÖÃĞĞ¾ÛÀàÊ÷¸ß
-         cutree_rows =2, #¸ù¾İÑùÆ·ÁĞ¾ÛÀàÇé¿ö½«ÈÈÍ¼µÄĞĞ·½Ïò¸ô¿ªÎª3·İ
-         main="GSE97210", # ÉèÖÃÍ¼ĞÎ±êÌâ
-         show_colnames = T, # ÉèÖÃĞĞÁĞ±êÇ©µÄÏÔÊ¾
+         scale = "row", # æŒ‰è¡Œå½’ä¸€åŒ–ï¼ŒæŸ¥çœ‹å› å­åœ¨ä¸åŒæ ·æœ¬ä¸­çš„åˆ†å¸ƒæƒ…å†µ
+         cluster_cols = FALSE, clustering_distance_rows = "correlation", #å–æ¶ˆåˆ—èšç±»ï¼Œè¡¨ç¤ºè¡Œèšç±»ä½¿ç”¨çš®å°”æ£®ç›¸å…³ç³»æ•°èšç±»
+         treeheight_row = 30, # è®¾ç½®è¡Œèšç±»æ ‘é«˜
+         cutree_rows =2, #æ ¹æ®æ ·å“åˆ—èšç±»æƒ…å†µå°†çƒ­å›¾çš„è¡Œæ–¹å‘éš”å¼€ä¸º3ä»½
+         main="GSE97210", # è®¾ç½®å›¾å½¢æ ‡é¢˜
+         show_colnames = T, # è®¾ç½®è¡Œåˆ—æ ‡ç­¾çš„æ˜¾ç¤º
          show_rownames = T,
          cellwidth = 28,cellheight = 20,
-         border="white", # ÉèÖÃ±ß¿òÎª°×É«
-         legend = T, # FALSEÈ¥³ıÍ¼Àı; TÏÔÊ¾Í¼Àı
-         fontsize_row = 10, # ·Ö±ğÉèÖÃĞĞÁĞ±êÇ©×ÖÌå´óĞ¡
+         border="white", # è®¾ç½®è¾¹æ¡†ä¸ºç™½è‰²
+         legend = T, # FALSEå»é™¤å›¾ä¾‹; Tæ˜¾ç¤ºå›¾ä¾‹
+         fontsize_row = 10, # åˆ†åˆ«è®¾ç½®è¡Œåˆ—æ ‡ç­¾å­—ä½“å¤§å°
          fontsize_col = 10,
-         angle_col = 90, # ÉèÖÃ±êÇ©ÏÔÊ¾½Ç¶È
-         annotation_col = annotation_col, #ÏÔÊ¾ÑùÆ·ÁĞµÄ·Ö×éĞÅÏ¢¼°Í¼Àı
-         annotation_colors = ann_colors, #Ê¹ÓÃannotation_colors²ÎÊıÉè¶¨ÑùÆ·ÁĞ·Ö×éµÄÑÕÉ«
+         angle_col = 90, # è®¾ç½®æ ‡ç­¾æ˜¾ç¤ºè§’åº¦
+         annotation_col = annotation_col, #æ˜¾ç¤ºæ ·å“åˆ—çš„åˆ†ç»„ä¿¡æ¯åŠå›¾ä¾‹
+         annotation_colors = ann_colors, #ä½¿ç”¨annotation_colorså‚æ•°è®¾å®šæ ·å“åˆ—åˆ†ç»„çš„é¢œè‰²
 )
